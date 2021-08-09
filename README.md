@@ -1,1 +1,5 @@
-python wsgi.py
+# Run 
+
+```` shell
+$ python wsgi.py
+````
