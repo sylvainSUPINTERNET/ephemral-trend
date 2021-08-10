@@ -39,8 +39,39 @@ for article in articles_div[:LIMIT_ITEM]:
 
               htmls_articles_pages.append(article_soup);
 
+article_scrapped = [];
+for soup_article in htmls_articles_pages:
+      base_article = soup_article.find_all("x-wrapper-re-1-3")[0];
+      # TEST
+      print(base_article);
 
-print(len(htmls_articles_pages))
+      article_name = base_article.find_all("h1")[0].text;
+      article_brand_name = base_article.find_all("h3")[0].text;
+      article_prices = [i.text for i in base_article.find_all("span") if i.text.find("€") != -1]; # 0 promo 1 real price
+      article_promo = [i.text for i in base_article.find_all("span") if i.text.find("%") != -1]; # promo
+
+
+      # Price need to be formatted due to shit character
+      promo_splitted = article_prices[0].split(",")
+      real_price_splitted = article_prices[1].split(",")
+
+      formatted_promo = f"{promo_splitted[0]}.{promo_splitted[1][:2]}" 
+      formatted_real_price = f"{real_price_splitted[0]}.{real_price_splitted[1][:2]}" 
+
+      article_scrapped.append({
+        "article_name": article_name,
+        "article_brand_name": article_brand_name,
+        "article_promo_percent": article_promo[0].split("%")[0],
+        "article_promo_price": formatted_promo,
+        "article_real_price": formatted_real_price
+      });
+      
+      #print(article_span);
+
+# TEST
+for a in article_scrapped:
+      print(str(a))
+
 
 
 
