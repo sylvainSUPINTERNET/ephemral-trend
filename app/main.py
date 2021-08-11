@@ -32,6 +32,8 @@ for article in articles_div[:LIMIT_ITEM]:
       if le != 0:
         if link_val.split(".")[len(link_val.split(".")) - 1] == "html":
               
+              print(link_val)
+
               # Create soup for each article and save it
               request = urllib.request.Request(link_val);
               response = urllib.request.urlopen(request);
@@ -42,8 +44,6 @@ for article in articles_div[:LIMIT_ITEM]:
 article_scrapped = [];
 for soup_article in htmls_articles_pages:
       base_article = soup_article.find_all("x-wrapper-re-1-3")[0];
-      # TEST
-      print(base_article);
 
       article_name = base_article.find_all("h1")[0].text;
       article_brand_name = base_article.find_all("h3")[0].text;
@@ -71,30 +71,6 @@ for soup_article in htmls_articles_pages:
 # TEST
 for a in article_scrapped:
       print(str(a))
-
-
-
-
-
-
-
-# print(len(articles_div));
-# scrapped_articles = [];
-# for article in articles_div:
-#       scrapped_articles.append(
-#         {
-#           "span_text": ""
-#         }
-#       )
-#       span_text.append({"span_text" : article.find_all("span") })
-#       h3_text = article.find_all("h3")
-#       h3_text.append({""})
-
-
-# try:
-# except Exception as e:
-#     print(e)
-#     print("something wrong")
 
 
 @app.route('/')
