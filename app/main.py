@@ -1,5 +1,26 @@
 from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
 app= Flask(__name__)
+app.config['DEBUG'] = False
+POSTGRES = {
+    'user': os.getenv('PG_USER'),
+    'pw': os.getenv('PG_PASSWORD'),
+    'db': os.getenv('PG_DB_NAME'),
+    'host': os.getenv('PG_DB_HOST'),
+    'port': os.getenv('PG_DB_PORT'),
+}
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://%(user)s:\
+%(pw)s@%(host)s:%(port)s/%(db)s' % POSTGRES
+db = SQLAlchemy(app)
+
+from model.Article import Article;
+# https://flask-sqlalchemy.palletsprojects.com/en/2.x/quickstart/
+db.create_all();
+
 
 import urllib.request
 from bs4 import BeautifulSoup
@@ -41,9 +62,9 @@ for article in articles_div[:LIMIT_ITEM]:
 
               htmls_articles_pages.append(article_soup);
 
-article_scrapped = [];
 for soup_article in htmls_articles_pages:
       base_article = soup_article.find_all("x-wrapper-re-1-3")[0];
+
 
       article_name = base_article.find_all("h1")[0].text;
       article_brand_name = base_article.find_all("h3")[0].text;
@@ -58,19 +79,16 @@ for soup_article in htmls_articles_pages:
       formatted_promo = f"{promo_splitted[0]}.{promo_splitted[1][:2]}" 
       formatted_real_price = f"{real_price_splitted[0]}.{real_price_splitted[1][:2]}" 
 
-      article_scrapped.append({
-        "article_name": article_name,
-        "article_brand_name": article_brand_name,
-        "article_promo_percent": article_promo[0].split("%")[0],
-        "article_promo_price": formatted_promo,
-        "article_real_price": formatted_real_price
-      });
-      
       #print(article_span);
 
-# TEST
-for a in article_scrapped:
-      print(str(a))
+
+      a = Article.query.filter_by(article_name=article_name).first()
+      if a == None :
+            new_article = Article(article_name=article_name, article_brand_name=article_brand_name, article_promo_percent=article_promo[0].split("%")[0], article_promo_price=formatted_promo, article_real_price=formatted_real_price)
+            db.session.add(new_article)
+            db.session.commit()
+      else:
+            print(f"article ignored : {article_name}, already exist !")
 
 
 @app.route('/')
