@@ -1,11 +1,15 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import os
+import json
 from dotenv import load_dotenv
+from flask_cors import CORS
 load_dotenv()
 
 app= Flask(__name__)
-app.config['DEBUG'] = False
+cors = CORS(app, resources={r"/*": {"origins": "*"}})
+
+app.config['DEBUG'] = True
 POSTGRES = {
     'user': os.getenv('PG_USER'),
     'pw': os.getenv('PG_PASSWORD'),
@@ -62,9 +66,8 @@ for article in articles_div[:LIMIT_ITEM]:
 
               htmls_articles_pages.append(article_soup);
 
-for soup_article in htmls_articles_pages:
+for soup_article in htmls_articles_pages:      
       base_article = soup_article.find_all("x-wrapper-re-1-3")[0];
-
 
       article_name = base_article.find_all("h1")[0].text;
       article_brand_name = base_article.find_all("h3")[0].text;
@@ -91,6 +94,10 @@ for soup_article in htmls_articles_pages:
             print(f"article ignored : {article_name}, already exist !")
 
 
-@app.route('/')
+@app.route('/api/v1/ephemeral/articles')
 def index():
-  return "<h1>Welcome to CodingX</h1>"
+      response_articles=[]
+      articles = Article.query.all();
+      for article in articles:
+            response_articles.append(article.as_dict())
+      return jsonify(response_articles), 200
