@@ -70,10 +70,12 @@ for article in articles_div[:LIMIT_ITEM]:
               htmls_articles_pages.append(article_soup);
 
 
-thumbnails_urls = []
-big_picture_urls = []
 
-for soup_article in htmls_articles_pages:            
+
+for soup_article in htmls_articles_pages:     
+      thumbnails_urls = []
+      big_picture_urls = []       
+
       base_article = soup_article.find_all("x-wrapper-re-1-3")[0];
       main_left = soup_article.find_all("x-wrapper-re-1-2")[0];
 
@@ -107,11 +109,11 @@ for soup_article in htmls_articles_pages:
       else:
             resp_t = ""
 
-      print(resp_t)
-      
+
       resp_b = ""
       if len(big_picture_urls) > 0:
-            resp_b = ", ".join(big_picture_urls)
+            # resp_b = ", ".join(big_picture_urls)
+            resp_b = big_picture_urls[0]
 
       article_thumbnails_url = resp_t;
       article_big_picture_urls = resp_b;
