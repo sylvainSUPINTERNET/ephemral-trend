@@ -7,8 +7,8 @@ class Article(db.Model):
     article_promo_percent = db.Column(db.String(255))
     article_promo_price = db.Column(db.String(255))
     article_real_price = db.Column(db.String(255))
-    article_thumbnails_url = db.Column(db.String())
-    article_big_picture_urls = db.Column(db.String())
+    article_thumbnails_url = db.Column(db.Text())
+    article_big_picture_urls = db.Column(db.Text())
 
     def __repr__(self):
         return '<Article %r>' % self.article_name

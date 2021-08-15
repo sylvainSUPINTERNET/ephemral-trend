@@ -34,7 +34,7 @@ from bs4 import BeautifulSoup
 
 
 # TODO => remove it out of testing context 
-LIMIT_ITEM = 2
+LIMIT_ITEM = 40
 
 request = urllib.request.Request('https://www.zalando.fr/promo-homme/')
 response = urllib.request.urlopen(request)
@@ -106,6 +106,8 @@ for soup_article in htmls_articles_pages:
             resp_t = ", ".join(thumbnails_urls)
       else:
             resp_t = ""
+
+      print(resp_t)
       
       resp_b = ""
       if len(big_picture_urls) > 0:
@@ -117,14 +119,14 @@ for soup_article in htmls_articles_pages:
 
       a = Article.query.filter_by(article_name=article_name).first()
       if a == None :
-            new_article = Article(article_name=article_name, article_brand_name=article_brand_name, article_promo_percent=article_promo[0].split("%")[0], article_promo_price=formatted_promo, article_real_price=formatted_real_price)
+            new_article = Article(article_name=article_name, article_brand_name=article_brand_name, article_promo_percent=article_promo[0].split("%")[0], article_promo_price=formatted_promo, article_real_price=formatted_real_price, article_thumbnails_url=resp_t, article_big_picture_urls=resp_b)
             db.session.add(new_article)
             db.session.commit()
       else:
-            print(f"article ignored : {article_name}, already exist !")
+            print(f"article updated : {article_name}, already exist !")
+            num_rows_updated = Article.query.filter_by(article_name=article_name).update(dict(article_name=article_name, article_brand_name=article_brand_name, article_promo_percent=article_promo[0].split("%")[0], article_promo_price=formatted_promo, article_real_price=formatted_real_price, article_thumbnails_url=resp_t, article_big_picture_urls=resp_b))
+            db.session.commit()
 
-      print(thumbnails_urls)
-      print(big_picture_urls)
 
 
 @app.route('/api/v1/ephemeral/articles')
