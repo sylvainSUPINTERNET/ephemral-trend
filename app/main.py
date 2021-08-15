@@ -4,6 +4,8 @@ import os
 import json
 from dotenv import load_dotenv
 from flask_cors import CORS
+from flask_migrate import Migrate
+
 load_dotenv()
 
 app= Flask(__name__)
@@ -20,6 +22,7 @@ POSTGRES = {
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://%(user)s:\
 %(pw)s@%(host)s:%(port)s/%(db)s' % POSTGRES
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 from model.Article import Article;
 # https://flask-sqlalchemy.palletsprojects.com/en/2.x/quickstart/
@@ -66,8 +69,24 @@ for article in articles_div[:LIMIT_ITEM]:
 
               htmls_articles_pages.append(article_soup);
 
-for soup_article in htmls_articles_pages:      
+
+thumbnails_urls = []
+big_picture_urls = []
+
+for soup_article in htmls_articles_pages:            
       base_article = soup_article.find_all("x-wrapper-re-1-3")[0];
+      main_left = soup_article.find_all("x-wrapper-re-1-2")[0];
+
+
+      # Big picture if exist
+      for el in main_left.select("div > div.JT3_zV > ul > li > div > div > img"):
+            if el.get("src") != None :
+                  big_picture_urls.append(el.get("src"))
+
+      # Small one on the left IF exist
+      for small_pic_div in base_article.select("x-wrapper-re-1-3 > div.okmnKS > div.w5w9i_ > div > div"):
+            for img in small_pic_div.find_all('img'):
+                  thumbnails_urls.append(img.get("src"))
 
       article_name = base_article.find_all("h1")[0].text;
       article_brand_name = base_article.find_all("h3")[0].text;
@@ -82,7 +101,18 @@ for soup_article in htmls_articles_pages:
       formatted_promo = f"{promo_splitted[0]}.{promo_splitted[1][:2]}" 
       formatted_real_price = f"{real_price_splitted[0]}.{real_price_splitted[1][:2]}" 
 
-      #print(article_span);
+      resp_t = ""
+      if len(thumbnails_urls) > 0:
+            resp_t = ", ".join(thumbnails_urls)
+      else:
+            resp_t = ""
+      
+      resp_b = ""
+      if len(big_picture_urls) > 0:
+            resp_b = ", ".join(big_picture_urls)
+
+      article_thumbnails_url = resp_t;
+      article_big_picture_urls = resp_b;
 
 
       a = Article.query.filter_by(article_name=article_name).first()
@@ -92,6 +122,9 @@ for soup_article in htmls_articles_pages:
             db.session.commit()
       else:
             print(f"article ignored : {article_name}, already exist !")
+
+      print(thumbnails_urls)
+      print(big_picture_urls)
 
 
 @app.route('/api/v1/ephemeral/articles')
